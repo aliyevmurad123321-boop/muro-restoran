@@ -1,0 +1,7 @@
+{
+  "name": "Muro Restoran",
+  "phone": "+994 50 123 45 67",
+  "address": "Bakı, Neftçilər prospekti 10",
+  "hours": "10:00 – 23:00",
+  "password": "pbkdf2$310000$9cee55d643a142babb2b00b0a32d5457$2da4410a9af0c977ce942326a6b46005143857fddf0a3026ecd5ed409b601a5c"
+}

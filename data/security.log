@@ -1,0 +1,8 @@
+[2026-03-09 04:49:09] LOGIN_OK             | IP: 127.0.0.1            | Admin uğurla daxil oldu
+[2026-03-09 04:50:43] PW_CHANGED           | IP: 127.0.0.1            | Şifrə uğurla dəyişdirildi
+[2026-03-09 04:51:15] LOGIN_FAIL           | IP: 127.0.0.1            | Yanlış şifrə — 1/5
+[2026-03-09 04:51:18] LOGIN_FAIL           | IP: 127.0.0.1            | Yanlış şifrə — 2/5
+[2026-03-09 04:51:32] LOGIN_FAIL           | IP: 127.0.0.1            | Yanlış şifrə — 3/5
+[2026-03-09 04:51:38] LOGIN_FAIL           | IP: 127.0.0.1            | Yanlış şifrə — 4/5
+[2026-03-09 04:52:18] LOGIN_OK             | IP: 127.0.0.1            | Admin uğurla daxil oldu
+[2026-03-09 04:52:30] LOGIN_OK             | IP: 127.0.0.1            | Admin uğurla daxil oldu

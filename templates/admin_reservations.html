@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+@media(max-width:700px){ .admin-layout { grid-template-columns:1fr; } }
+.admin-sidebar { background:var(--dark); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.3rem; }
+.sidebar-title { color:var(--gold); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; padding:.5rem; margin-bottom:.5rem; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; color:#c8b890; text-decoration:none; padding:.7rem 1rem; border-radius:8px; font-size:.9rem; font-weight:600; transition:all .2s; }
+.sidebar-link:hover, .sidebar-link.active { background:rgba(201,168,76,.15); color:var(--gold); }
+.admin-main { padding:2rem; background:#f9f4ec; }
+.page-title { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:2rem; }
+.section-card { background:#fff; border-radius:12px; padding:1.5rem; border:1px solid #f0e5cc; }
+.status-form { display:flex; gap:.4rem; align-items:center; }
+.status-form select { padding:.3rem .5rem; border:1px solid #e0d0b0; border-radius:5px; font-size:.8rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="sidebar-title">⚙ Admin Panel</div>
+    <a href="/admin/dashboard"    class="sidebar-link"><span>📊</span> Dashboard</a>
+    <a href="/admin/orders"       class="sidebar-link"><span>🛒</span> Sifarişlər</a>
+    <a href="/admin/reservations" class="sidebar-link active"><span>📅</span> Rezervasiyalar</a>
+    <a href="/admin/menu"         class="sidebar-link"><span>🍽</span> Menyu İdarəsi</a>
+    <a href="/admin/settings"     class="sidebar-link"><span>⚙️</span> Parametrlər</a>
+    <div style="flex:1"></div>
+    <a href="/admin/logout" class="sidebar-link" style="color:#e74c3c;"><span>🚪</span> Çıxış</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-title">📅 Rezervasiyalar ({{ reservations|length }})</div>
+    <div class="section-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Ad</th><th>Telefon</th><th>Tarix / Saat</th><th>Qonaq</th><th>Qeyd</th><th>Status</th><th>Əməliyyat</th></tr>
+        </thead>
+        <tbody>
+        {% for r in reservations|reverse %}
+        <tr>
+          <td><strong>#{{ r.id }}</strong></td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.phone }}</td>
+          <td><strong>{{ r.date }}</strong><br><small>{{ r.time }}</small></td>
+          <td>{{ r.guests }} nəfər</td>
+          <td><small style="color:var(--muted)">{{ r.note or '—' }}</small></td>
+          <td>
+            {% if r.status == 'Təsdiqləndi' %}<span class="badge badge-done">{{ r.status }}</span>
+            {% elif r.status == 'Ləğv edildi' %}<span class="badge badge-cancel">{{ r.status }}</span>
+            {% else %}<span class="badge badge-wait">{{ r.status }}</span>{% endif %}
+          </td>
+          <td>
+            <form method="POST" action="/admin/reservations/update" class="status-form">
+              <input type="hidden" name="res_id" value="{{ r.id }}">
+              <select name="status">
+                <option>Təsdiqlənmədi</option>
+                <option>Təsdiqləndi</option>
+                <option>Ləğv edildi</option>
+              </select>
+              <button type="submit" class="btn btn-gold btn-sm">✓</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:3rem">Hələ heç bir rezervasiya yoxdur</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.page-hero { background:linear-gradient(135deg,var(--dark),var(--dark2)); padding:4rem 2rem 3rem; text-align:center; }
+.page-hero h1 { font-family:'Playfair Display',serif; font-size:2.5rem; color:var(--gold); }
+.page-hero p  { color:#c8b890; margin-top:.5rem; }
+.res-wrap { max-width:680px; margin:3rem auto; padding:0 2rem; }
+.res-card { background:#fff; border-radius:16px; padding:2.5rem; border:1px solid #f0e5cc; box-shadow:0 4px 20px rgba(0,0,0,.06); }
+.res-card h2 { font-family:'Playfair Display',serif; font-size:1.6rem; margin-bottom:.3rem; }
+.res-card p  { color:var(--muted); margin-bottom:2rem; font-size:.9rem; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:500px){ .form-row { grid-template-columns:1fr; } }
+.submit-btn { width:100%; padding:.9rem; background:var(--gold); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; color:var(--dark); font-family:'Nunito',sans-serif; margin-top:.5rem; transition:.2s; }
+.submit-btn:hover { background:var(--gold-light); transform:translateY(-1px); }
+
+.info-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.info-c { background:var(--dark); color:#c8b890; border-radius:10px; padding:1.2rem; text-align:center; }
+.info-c .ico { font-size:1.8rem; margin-bottom:.4rem; }
+.info-c .lbl { font-size:.75rem; color:var(--gold); letter-spacing:.08em; text-transform:uppercase; margin-bottom:.25rem; }
+.info-c .val { font-size:.95rem; color:#fff; font-weight:600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <h1>Masa Rezervasiyası</h1>
+  <p>Xüsusi günlər üçün masanızı əvvəlcədən rezerv edin</p>
+</div>
+
+<div class="res-wrap">
+  <div class="info-cards">
+    <div class="info-c"><div class="ico">📍</div><div class="lbl">Ünvan</div><div class="val">{{ settings.address }}</div></div>
+    <div class="info-c"><div class="ico">📞</div><div class="lbl">Telefon</div><div class="val">{{ settings.phone }}</div></div>
+    <div class="info-c"><div class="ico">🕐</div><div class="lbl">İş Saatları</div><div class="val">{{ settings.hours }}</div></div>
+  </div>
+
+  <div class="res-card">
+    <h2>📅 Rezervasiya Formu</h2>
+    <p>Aşağıdakı formu doldurun, biz sizinlə əlaqə saxlayacağıq.</p>
+    <form method="POST" action="/reservation">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ad Soyad *</label>
+          <input type="text" name="name" placeholder="Adınız" required>
+        </div>
+        <div class="form-group">
+          <label>Telefon *</label>
+          <input type="tel" name="phone" placeholder="+994 XX XXX XX XX" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tarix *</label>
+          <input type="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label>Saat *</label>
+          <input type="time" name="time" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Qonaq sayı *</label>
+        <select name="guests">
+          {% for i in range(1, 13) %}
+          <option value="{{ i }}">{{ i }} nəfər</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Xüsusi qeyd</label>
+        <textarea name="note" rows="3" placeholder="Doğum günü, ad günü, allergi və s."></textarea>
+      </div>
+      <button type="submit" class="submit-btn">📅 Rezervasiya Göndər</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.hero {
+  min-height:92vh;
+  background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 60%, #3d2a08 100%);
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:2rem;
+  position:relative; overflow:hidden;
+}
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(201,168,76,.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 20%, rgba(201,168,76,.08) 0%, transparent 50%);
+}
+.hero-inner { position:relative; z-index:1; max-width:700px; }
+.hero-badge {
+  display:inline-block;
+  background:rgba(201,168,76,.15);
+  border:1px solid rgba(201,168,76,.4);
+  color:var(--gold);
+  padding:.4rem 1.2rem;
+  border-radius:20px;
+  font-size:.85rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:1.5rem;
+}
+.hero h1 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.5rem,6vw,4.5rem);
+  color:#fff;
+  line-height:1.1;
+  margin-bottom:1rem;
+}
+.hero h1 span { color:var(--gold); }
+.hero p { color:#c8b890; font-size:1.1rem; line-height:1.7; margin-bottom:2.5rem; }
+.hero-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+
+/* Decorative circles */
+.circle {
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(201,168,76,.1);
+}
+.c1 { width:400px; height:400px; top:-100px; right:-100px; }
+.c2 { width:250px; height:250px; bottom:50px; left:-80px; }
+.c3 { width:150px; height:150px; top:50%; right:10%; }
+
+/* Features */
+.features { padding:5rem 2rem; max-width:1100px; margin:0 auto; }
+.features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:1.5rem; margin-top:2rem; }
+.feat-card {
+  background:#fff;
+  border-radius:14px;
+  padding:2rem 1.5rem;
+  text-align:center;
+  border:1px solid #f0e5cc;
+  transition:all .3s;
+  cursor:default;
+}
+.feat-card:hover { transform:translateY(-5px); box-shadow:0 10px 30px rgba(201,168,76,.15); border-color:var(--gold); }
+.feat-icon { font-size:2.5rem; margin-bottom:1rem; }
+.feat-card h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:.5rem; }
+.feat-card p  { color:var(--muted); font-size:.9rem; line-height:1.6; }
+
+/* Info strip */
+.info-strip {
+  background:var(--dark);
+  color:#c8b890;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:0;
+}
+.info-item { padding:2rem; text-align:center; border-right:1px solid rgba(201,168,76,.15); }
+.info-item:last-child { border-right:none; }
+.info-item .label { color:var(--gold); font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:.5rem; }
+.info-item .value { font-size:1.1rem; font-weight:600; color:#fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="circle c3"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">✦ Bakının ən ləzzətli restoranı ✦</div>
+    <h1>Ənənəvi <span>Azərbaycan</span> Mətbəxi</h1>
+    <p>Hər tikə ilə hiss et — əl işi reseptlər, təzə məhsullar, ürəkdən hazırlanmış yeməklər.</p>
+    <div class="hero-btns">
+      <a href="/menu"        class="btn btn-gold">🍽 Menyuya Bax</a>
+      <a href="/order"       class="btn btn-dark">🛒 Sifariş Et</a>
+      <a href="/reservation" class="btn btn-dark">📅 Masa Rezerv Et</a>
+    </div>
+  </div>
+</section>
+
+<div class="info-strip">
+  <div class="info-item">
+    <div class="label">📍 Ünvan</div>
+    <div class="value">{{ settings.address }}</div>
+  </div>
+  <div class="info-item">
+    <div class="label">📞 Telefon</div>
+    <div class="value">{{ settings.phone }}</div>
+  </div>
+  <div class="info-item">
+    <div class="label">🕐 İş saatları</div>
+    <div class="value">{{ settings.hours }}</div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="section-title">Niyə bizi seçirsiniz?</div>
+  <div class="gold-line"></div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🥩</div>
+      <h3>Təzə Məhsullar</h3>
+      <p>Hər gün bazardan seçilmiş ən təzə ət, tərəvəz və baharatlı ərazi.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">👨‍🍳</div>
+      <h3>Peşəkar Aşpazlar</h3>
+      <p>20 ildən artıq təcrübəli aşpazlarımız ənənəvi reseptləri yaşadır.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🏡</div>
+      <h3>Rahat Mühit</h3>
+      <p>Ailə və dostlarla vaxt keçirmək üçün istiqliyyətli, sərin atmosfer.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📱</div>
+      <h3>Onlayn Sifariş</h3>
+      <p>Evdən çıxmadan sifariş verin, masa rezerv edin — tam rahat.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}
