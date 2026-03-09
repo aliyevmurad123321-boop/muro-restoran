@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+@media(max-width:700px){ .admin-layout { grid-template-columns:1fr; } }
+.admin-sidebar { background:var(--dark); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.3rem; }
+.sidebar-title { color:var(--gold); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; padding:.5rem; margin-bottom:.5rem; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; color:#c8b890; text-decoration:none; padding:.7rem 1rem; border-radius:8px; font-size:.9rem; font-weight:600; transition:all .2s; }
+.sidebar-link:hover,.sidebar-link.active { background:rgba(201,168,76,.15); color:var(--gold); }
+.admin-main { padding:2rem; background:#f9f4ec; }
+.page-title { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:2rem; }
+.settings-card { background:#fff; border-radius:14px; padding:2rem; border:1px solid #f0e5cc; max-width:620px; margin-bottom:1.5rem; }
+.settings-card h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:1.2rem; border-bottom:2px solid var(--gold); padding-bottom:.5rem; }
+.save-btn { padding:.85rem 2.5rem; background:var(--gold); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; color:var(--dark); font-family:'Nunito',sans-serif; transition:.2s; }
+.save-btn:hover { background:var(--gold-light); }
+.hint { font-size:.8rem; color:var(--muted); margin-top:.3rem; }
+.security-info { background:#f0f9ff; border:1px solid #b8e0f7; border-radius:10px; padding:1.2rem 1.5rem; margin-bottom:1.5rem; max-width:620px; }
+.security-info h4 { color:#0369a1; font-size:.9rem; margin-bottom:.5rem; }
+.security-info ul { color:#0c4a6e; font-size:.85rem; line-height:1.8; padding-left:1.2rem; }
+.session-info { background:var(--dark); color:#c8b890; border-radius:10px; padding:1rem 1.5rem; max-width:620px; margin-bottom:1.5rem; font-size:.85rem; }
+.session-info strong { color:var(--gold); }
+.pw-strength { height:4px; border-radius:2px; margin-top:.4rem; transition:all .3s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="sidebar-title">⚙ Admin Panel</div>
+    <a href="/admin/dashboard"    class="sidebar-link"><span>📊</span> Dashboard</a>
+    <a href="/admin/orders"       class="sidebar-link"><span>🛒</span> Sifarişlər</a>
+    <a href="/admin/reservations" class="sidebar-link"><span>📅</span> Rezervasiyalar</a>
+    <a href="/admin/menu"         class="sidebar-link"><span>🍽</span> Menyu İdarəsi</a>
+    <a href="/admin/settings"     class="sidebar-link active"><span>⚙️</span> Parametrlər</a>
+    <div style="flex:1"></div>
+    <a href="/admin/logout" class="sidebar-link" style="color:#e74c3c;"><span>🚪</span> Çıxış</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-title">⚙️ Parametrlər</div>
+
+    <!-- Aktiv sessiya məlumatı -->
+    <div class="session-info">
+      🔐 <strong>Aktiv Sessiya</strong> &nbsp;|&nbsp;
+      Giriş vaxtı: <strong>{{ login_time[:16] if login_time != 'Bilinmir' else 'Bilinmir' }}</strong> &nbsp;|&nbsp;
+      Sessiya 4 saatdan sonra avtomatik bağlanır
+    </div>
+
+    <!-- Təhlükəsizlik məlumatı -->
+    <div class="security-info">
+      <h4>🛡️ Aktiv Təhlükəsizlik Qorumaları</h4>
+      <ul>
+        <li>✅ Şifrəniz PBKDF2-SHA256 ilə hashlanıb — fayl oxunsa belə şifrə görünmür</li>
+        <li>✅ 5 yanlış cəhddən sonra 5 dəqiqə kilidlənmə</li>
+        <li>✅ Session IP-ə bağlıdır — başqası oğurlasa işləmir</li>
+        <li>✅ Hər giriş/çıxış loqlanır</li>
+      </ul>
+    </div>
+
+    <form method="POST">
+      <!-- Restoran məlumatları -->
+      <div class="settings-card">
+        <h3>🏪 Restoran Məlumatları</h3>
+        <div class="form-group">
+          <label>Restoran Adı</label>
+          <input type="text" name="name" value="{{ settings.name }}" required>
+        </div>
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="text" name="phone" value="{{ settings.phone }}">
+        </div>
+        <div class="form-group">
+          <label>Ünvan</label>
+          <input type="text" name="address" value="{{ settings.address }}">
+        </div>
+        <div class="form-group">
+          <label>İş Saatları</label>
+          <input type="text" name="hours" value="{{ settings.hours }}" placeholder="məs: 10:00 – 23:00">
+        </div>
+      </div>
+
+      <!-- Şifrə dəyişmə -->
+      <div class="settings-card">
+        <h3>🔑 Şifrə Dəyişdir</h3>
+
+        <div class="form-group">
+          <label>Cari Şifrə * <span style="color:var(--red);font-size:.8rem">(mütləq daxil edin)</span></label>
+          <input type="password" name="current_password" placeholder="Mövcud şifrənizi daxil edin" required>
+          <div class="hint">⚠️ İstənilən dəyişiklik üçün cari şifrə tələb olunur — bu hakerlərə qarşı əlavə qorumadir.</div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #f0e5cc;margin:1.2rem 0">
+
+        <div class="form-group">
+          <label>Yeni Şifrə <span style="color:var(--muted);font-size:.8rem">(dəyişdirmək istəmirsinizsə boş buraxın)</span></label>
+          <input type="password" name="new_password" id="newPw" placeholder="Ən az 8 simvol" oninput="checkStrength(this.value)">
+          <div class="pw-strength" id="pwBar"></div>
+          <div class="hint" id="pwHint"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Yeni Şifrəni Təkrarla</label>
+          <input type="password" name="confirm_password" id="confirmPw" placeholder="Eyni şifrəni yenidən yazın" oninput="checkMatch()">
+          <div class="hint" id="matchHint"></div>
+        </div>
+
+        <button type="submit" class="save-btn">💾 Yadda Saxla</button>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function checkStrength(pw) {
+  const bar  = document.getElementById('pwBar');
+  const hint = document.getElementById('pwHint');
+  if (!pw) { bar.style.width='0'; bar.style.background=''; hint.textContent=''; return; }
+  let score = 0;
+  if (pw.length >= 8)  score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const levels = [
+    {color:'#e74c3c', label:'Çox zəif'},
+    {color:'#e67e22', label:'Zəif'},
+    {color:'#f1c40f', label:'Orta'},
+    {color:'#2ecc71', label:'Güclü'},
+    {color:'#27ae60', label:'Çox güclü ✅'}
+  ];
+  const lvl = levels[Math.min(score, 4)];
+  bar.style.cssText = `width:${(score/5)*100}%; background:${lvl.color}; height:4px; border-radius:2px; transition:.3s;`;
+  hint.textContent  = `Güc: ${lvl.label}`;
+  hint.style.color  = lvl.color;
+}
+
+function checkMatch() {
+  const np = document.getElementById('newPw').value;
+  const cp = document.getElementById('confirmPw').value;
+  const h  = document.getElementById('matchHint');
+  if (!cp) { h.textContent=''; return; }
+  if (np===cp) { h.textContent='✅ Şifrələr uyğundur'; h.style.color='#27ae60'; }
+  else          { h.textContent='❌ Şifrələr uyğun deyil'; h.style.color='#e74c3c'; }
+}
+</script>
+{% endblock %}

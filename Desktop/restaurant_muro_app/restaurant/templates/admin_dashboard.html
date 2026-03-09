@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+@media(max-width:700px){ .admin-layout { grid-template-columns:1fr; } }
+.admin-sidebar { background:var(--dark); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.3rem; }
+.sidebar-title { color:var(--gold); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; padding:.5rem; margin-bottom:.5rem; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; color:#c8b890; text-decoration:none; padding:.7rem 1rem; border-radius:8px; font-size:.9rem; font-weight:600; transition:all .2s; }
+.sidebar-link:hover,.sidebar-link.active { background:rgba(201,168,76,.15); color:var(--gold); }
+.admin-main { padding:2rem; background:#f9f4ec; }
+.admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; }
+.admin-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card { background:#fff; border-radius:12px; padding:1.5rem; border:1px solid #f0e5cc; text-align:center; }
+.stat-num  { font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--gold); font-weight:700; }
+.stat-label{ color:var(--muted); font-size:.85rem; margin-top:.3rem; }
+.section-card { background:#fff; border-radius:12px; padding:1.5rem; border:1px solid #f0e5cc; margin-bottom:1.5rem; }
+.sc-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+.sc-title  { font-family:'Playfair Display',serif; font-size:1.2rem; }
+
+/* Log panel */
+.log-panel { background:#0d1117; border-radius:12px; padding:1.2rem; font-family:'Courier New',monospace; font-size:.78rem; max-height:320px; overflow-y:auto; }
+.log-line   { padding:.15rem 0; border-bottom:1px solid rgba(255,255,255,.04); white-space:pre; }
+.log-ok     { color:#3fb950; }
+.log-fail   { color:#f85149; }
+.log-block  { color:#ff7b72; font-weight:bold; }
+.log-unauth { color:#d29922; }
+.log-change { color:#79c0ff; }
+.log-other  { color:#8b949e; }
+.log-empty  { color:#484f58; font-style:italic; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="sidebar-title">⚙ Admin Panel</div>
+    <a href="/admin/dashboard"    class="sidebar-link active"><span>📊</span> Dashboard</a>
+    <a href="/admin/orders"       class="sidebar-link"><span>🛒</span> Sifarişlər</a>
+    <a href="/admin/reservations" class="sidebar-link"><span>📅</span> Rezervasiyalar</a>
+    <a href="/admin/menu"         class="sidebar-link"><span>🍽</span> Menyu İdarəsi</a>
+    <a href="/admin/settings"     class="sidebar-link"><span>⚙️</span> Parametrlər</a>
+    <div style="flex:1"></div>
+    <a href="/admin/logout" class="sidebar-link" style="color:#e74c3c;"><span>🚪</span> Çıxış</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <h1>📊 Dashboard</h1>
+      <a href="/" class="btn btn-dark btn-sm" target="_blank">🌐 Sayta Bax</a>
+    </div>
+
+    <!-- Statistika -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">{{ orders|length }}</div>
+        <div class="stat-label">🛒 Ümumi Sifariş</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ pending_orders|length }}</div>
+        <div class="stat-label">⏳ Gözləyən</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ reservations|length }}</div>
+        <div class="stat-label">📅 Rezervasiya</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">{{ "%.0f"|format(total_revenue) }}₼</div>
+        <div class="stat-label">💰 Ümumi Gəlir</div>
+      </div>
+    </div>
+
+    <!-- Gözləyən sifarişlər -->
+    {% if pending_orders %}
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">⏳ Gözləyən Sifarişlər</div>
+        <a href="/admin/orders" class="btn btn-dark btn-sm">Hamısı →</a>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Müştəri</th><th>Masa</th><th>Məbləğ</th><th>Vaxt</th></tr></thead>
+        <tbody>
+        {% for o in pending_orders[-5:] %}
+        <tr>
+          <td>#{{ o.id }}</td>
+          <td><strong>{{ o.name }}</strong><br><small style="color:var(--muted)">{{ o.phone }}</small></td>
+          <td>{{ o.table or '—' }}</td>
+          <td style="color:var(--gold);font-weight:700">{{ o.total }}₼</td>
+          <td><small>{{ o.time }}</small></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Gözləyən rezervasiyalar -->
+    {% if pending_res %}
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">📅 Gözləyən Rezervasiyalar</div>
+        <a href="/admin/reservations" class="btn btn-dark btn-sm">Hamısı →</a>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Ad</th><th>Tarix / Saat</th><th>Qonaq</th></tr></thead>
+        <tbody>
+        {% for r in pending_res[-5:] %}
+        <tr>
+          <td>#{{ r.id }}</td>
+          <td><strong>{{ r.name }}</strong><br><small>{{ r.phone }}</small></td>
+          <td>{{ r.date }} {{ r.time }}</td>
+          <td>{{ r.guests }} nəfər</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    {% if not pending_orders and not pending_res %}
+    <div class="section-card" style="text-align:center;padding:2.5rem;color:var(--muted)">
+      <div style="font-size:2.5rem;margin-bottom:.5rem">✅</div>
+      <strong>Hər şey qaydasındadır!</strong> Gözləyən sifariş və ya rezervasiya yoxdur.
+    </div>
+    {% endif %}
+
+    <!-- Təhlükəsizlik Loqları -->
+    <div class="section-card">
+      <div class="sc-header">
+        <div class="sc-title">🛡️ Təhlükəsizlik Loqları <span style="font-size:.75rem;color:var(--muted);font-family:'Nunito',sans-serif;">(son 30 hadisə)</span></div>
+      </div>
+      <div class="log-panel">
+        {% if logs %}
+          {% for line in logs %}
+            {% if 'LOGIN_OK' in line or 'PW_CHANGED' in line %}
+              <div class="log-line log-ok">{{ line.strip() }}</div>
+            {% elif 'LOGIN_FAIL' in line or 'PW_CHANGE_FAIL' in line %}
+              <div class="log-line log-fail">{{ line.strip() }}</div>
+            {% elif 'BLOCKED' in line or 'SESSION_HIJACK' in line %}
+              <div class="log-line log-block">{{ line.strip() }}</div>
+            {% elif 'UNAUTH' in line %}
+              <div class="log-line log-unauth">{{ line.strip() }}</div>
+            {% elif 'MENU_' in line or 'ORDER_' in line or 'RES_' in line %}
+              <div class="log-line log-change">{{ line.strip() }}</div>
+            {% else %}
+              <div class="log-line log-other">{{ line.strip() }}</div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="log-line log-empty">Hələ heç bir loq qeydiyyatı yoxdur.</div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

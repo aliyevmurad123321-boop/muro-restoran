@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.page-hero { background:linear-gradient(135deg,var(--dark),var(--dark2)); padding:4rem 2rem 3rem; text-align:center; color:#fff; }
+.page-hero h1 { font-family:'Playfair Display',serif; font-size:2.5rem; color:var(--gold); }
+.page-hero p  { color:#c8b890; margin-top:.5rem; }
+
+.order-layout { max-width:1200px; margin:0 auto; padding:2rem; display:grid; grid-template-columns:1fr 340px; gap:2rem; }
+@media(max-width:900px){ .order-layout { grid-template-columns:1fr; } }
+
+/* Menu side */
+.menu-search { margin-bottom:1.5rem; }
+.menu-search input {
+  width:100%; padding:.8rem 1rem;
+  border:1.5px solid #e0d0b0; border-radius:8px;
+  font-size:1rem; font-family:'Nunito',sans-serif;
+  background:#fdfaf4;
+}
+.menu-search input:focus { outline:none; border-color:var(--gold); }
+
+.cat-label { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--dark); padding:.5rem 0; border-bottom:2px solid var(--gold); margin:1.5rem 0 1rem; }
+.menu-item-row {
+  display:flex; align-items:center; gap:1rem;
+  background:#fff; border-radius:10px; padding:1rem 1.2rem;
+  margin-bottom:.6rem; border:1px solid #f0e5cc; transition:all .2s;
+}
+.menu-item-row:hover { border-color:var(--gold); box-shadow:0 3px 12px rgba(201,168,76,.12); }
+.mi-emoji  { font-size:1.8rem; }
+.mi-info   { flex:1; }
+.mi-name   { font-weight:700; font-size:.95rem; }
+.mi-desc   { color:var(--muted); font-size:.8rem; }
+.mi-price  { font-family:'Playfair Display',serif; color:var(--gold); font-size:1.1rem; font-weight:700; margin-right:.5rem; }
+.add-btn   { width:34px; height:34px; border-radius:50%; background:var(--gold); border:none; font-size:1.2rem; cursor:pointer; color:var(--dark); font-weight:700; transition:all .2s; }
+.add-btn:hover { background:var(--gold-light); transform:scale(1.1); }
+
+/* Cart */
+.cart-box  { background:#fff; border-radius:14px; border:1px solid #f0e5cc; padding:1.5rem; position:sticky; top:80px; }
+.cart-title{ font-family:'Playfair Display',serif; font-size:1.4rem; margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+.cart-empty{ color:var(--muted); text-align:center; padding:2rem; font-size:.9rem; }
+.cart-item { display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem; font-size:.9rem; }
+.cart-item-name { flex:1; }
+.qty-btn { width:26px; height:26px; border-radius:50%; border:1px solid var(--gold); background:transparent; color:var(--gold); font-weight:700; cursor:pointer; font-size:.9rem; transition:.2s; }
+.qty-btn:hover { background:var(--gold); color:var(--dark); }
+.qty-num { min-width:22px; text-align:center; font-weight:700; }
+.cart-item-price { color:var(--gold); font-weight:700; font-family:'Playfair Display',serif; }
+.remove-btn { background:none; border:none; color:#ccc; cursor:pointer; font-size:1rem; }
+.remove-btn:hover { color:var(--red); }
+.cart-divider { border:none; border-top:1px solid #f0e5cc; margin:1rem 0; }
+.cart-total { display:flex; justify-content:space-between; font-weight:700; font-size:1.1rem; }
+.cart-total span:last-child { color:var(--gold); font-family:'Playfair Display',serif; font-size:1.3rem; }
+
+.order-form { margin-top:1.2rem; }
+.order-form .form-group { margin-bottom:.8rem; }
+.order-form label { font-size:.8rem; font-weight:700; color:var(--muted); display:block; margin-bottom:.3rem; }
+.order-form input, .order-form textarea {
+  width:100%; padding:.6rem .8rem; border:1.5px solid #e0d0b0; border-radius:7px;
+  font-size:.9rem; font-family:'Nunito',sans-serif; background:#fdfaf4;
+}
+.order-form input:focus, .order-form textarea:focus { outline:none; border-color:var(--gold); }
+.submit-btn { width:100%; padding:.85rem; background:var(--gold); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; color:var(--dark); font-family:'Nunito',sans-serif; margin-top:.5rem; transition:.2s; }
+.submit-btn:hover { background:var(--gold-light); }
+.submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* Success modal */
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+.modal-bg.open { display:flex; }
+.modal { background:#fff; border-radius:16px; padding:2.5rem; text-align:center; max-width:380px; margin:1rem; }
+.modal h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--green); margin-bottom:.5rem; }
+.modal p  { color:var(--muted); margin-bottom:1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <h1>Onlayn Sifariş</h1>
+  <p>Menyudan seçin, sifarişinizi təsdiqləyin</p>
+</div>
+
+<div class="order-layout">
+  <!-- Left: Menu -->
+  <div>
+    <div class="menu-search">
+      <input type="text" id="searchInput" placeholder="🔍 Yemək axtar..." oninput="searchMenu()">
+    </div>
+    {% for category, items in menu.items() %}
+    <div class="cat-section">
+      <div class="cat-label">{{ category }}</div>
+      {% for item in items %}
+      <div class="menu-item-row" id="mi-{{item.id}}" data-name="{{ item.name|lower }}">
+        <div class="mi-emoji">{{ item.emoji }}</div>
+        <div class="mi-info">
+          <div class="mi-name">{{ item.name }}</div>
+          <div class="mi-desc">{{ item.desc }}</div>
+        </div>
+        <span class="mi-price">{{ "%.2f"|format(item.price) }}₼</span>
+        <button class="add-btn" onclick='addToCart({{ item.id }}, "{{ item.name }}", {{ item.price }})'>+</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Right: Cart -->
+  <div>
+    <div class="cart-box">
+      <div class="cart-title">🛒 Səbətinim <span id="cartCount" style="background:var(--gold);color:var(--dark);border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:.8rem;">0</span></div>
+      <div id="cartItems"><div class="cart-empty">Hələ heç nə əlavə etməmisiniz</div></div>
+      <hr class="cart-divider">
+      <div class="cart-total"><span>Cəmi:</span><span id="cartTotal">0.00 ₼</span></div>
+
+      <div class="order-form">
+        <div class="form-group"><label>Adınız *</label><input id="cName" placeholder="Ad Soyad" required></div>
+        <div class="form-group"><label>Telefon *</label><input id="cPhone" placeholder="+994 XX XXX XX XX" required></div>
+        <div class="form-group"><label>Masa nömrəsi</label><input id="cTable" placeholder="Məs: 5 (və ya boş buraxın)"></div>
+        <div class="form-group"><label>Qeyd</label><textarea id="cNote" rows="2" placeholder="Xüsusi istək varsa..."></textarea></div>
+        <button class="submit-btn" id="submitBtn" onclick="submitOrder()">✅ Sifarişi Təsdiqlə</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-bg" id="successModal">
+  <div class="modal">
+    <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
+    <h2>Sifariş Qəbul Edildi!</h2>
+    <p id="successMsg">Sifarişiniz hazırlanmağa başlayacaq. Təşəkkür edirik!</p>
+    <a href="/" class="btn btn-gold">Ana Səhifəyə Qayıt</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let cart = {};
+
+function addToCart(id, name, price) {
+  if (cart[id]) { cart[id].qty++; }
+  else           { cart[id] = { name, price, qty:1 }; }
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  renderCart();
+}
+
+function removeItem(id) { delete cart[id]; renderCart(); }
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const keys = Object.keys(cart);
+  document.getElementById('cartCount').textContent = keys.reduce((a,k)=>a+cart[k].qty,0);
+  if (!keys.length) {
+    container.innerHTML = '<div class="cart-empty">Hələ heç nə əlavə etməmisiniz</div>';
+    document.getElementById('cartTotal').textContent = '0.00 ₼';
+    return;
+  }
+  let total = 0, html = '';
+  keys.forEach(id => {
+    const it = cart[id];
+    const sub = it.price * it.qty;
+    total += sub;
+    html += `<div class="cart-item">
+      <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+      <span class="qty-num">${it.qty}</span>
+      <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+      <span class="cart-item-name">${it.name}</span>
+      <span class="cart-item-price">${sub.toFixed(2)}₼</span>
+      <button class="remove-btn" onclick="removeItem(${id})">✕</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('cartTotal').textContent = total.toFixed(2) + ' ₼';
+}
+
+function submitOrder() {
+  const name  = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  if (!name || !phone) { alert('Ad və telefon mütləqdir!'); return; }
+  if (!Object.keys(cart).length) { alert('Səbət boşdur!'); return; }
+  const items = Object.values(cart).map(i=>({name:i.name,price:i.price,qty:i.qty}));
+  const total = items.reduce((a,i)=>a+i.price*i.qty,0).toFixed(2);
+  document.getElementById('submitBtn').disabled = true;
+  fetch('/order', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name, phone, table:document.getElementById('cTable').value, items, total, note:document.getElementById('cNote').value })
+  }).then(r=>r.json()).then(d=>{
+    if (d.success) {
+      document.getElementById('successMsg').textContent = `Sifariş #${d.order_id} qəbul edildi. Hazırlanır!`;
+      document.getElementById('successModal').classList.add('open');
+    }
+  });
+}
+
+function searchMenu() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('.menu-item-row').forEach(el => {
+    el.style.display = el.dataset.name.includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

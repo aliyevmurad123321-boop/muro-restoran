@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.login-wrap { min-height:80vh; display:flex; align-items:center; justify-content:center; padding:2rem; }
+.login-card { background:#fff; border-radius:16px; padding:3rem 2.5rem; max-width:440px; width:100%; border:1px solid #f0e5cc; box-shadow:0 8px 40px rgba(0,0,0,.08); text-align:center; }
+.login-icon { font-size:3rem; margin-bottom:1rem; }
+.login-card h2 { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:.3rem; }
+.login-card p { color:var(--muted); margin-bottom:2rem; font-size:.9rem; }
+.login-btn { width:100%; padding:.9rem; background:var(--dark); border:none; border-radius:8px; color:var(--gold); font-weight:700; font-size:1rem; cursor:pointer; font-family:'Nunito',sans-serif; transition:.2s; }
+.login-btn:hover { background:var(--dark2); }
+.back-link { display:block; margin-top:1rem; color:var(--muted); font-size:.85rem; text-decoration:none; }
+.back-link:hover { color:var(--gold); }
+.security-note { background:#f0f9ff; border:1px solid #b8e0f7; border-radius:8px; padding:.8rem 1rem; text-align:left; margin-bottom:1.2rem; font-size:.82rem; color:#0c4a6e; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h2>Admin Panel</h2>
+    <p>Yalniz yetkili sexsler daxil ola biler</p>
+    <div class="security-note">
+      5 yanlis cehden sonra 5 deqiqe klidlenirsiniz.
+    </div>
+    <form method="POST">
+      <div class="form-group" style="text-align:left">
+        <label>Admin Sifresi</label>
+        <input type="password" name="password" placeholder="Sifreni daxil edin" required autofocus>
+      </div>
+      <button type="submit" class="login-btn">Daxil Ol</button>
+    </form>
+    <a href="/" class="back-link">Ana sehifeye qayit</a>
+  </div>
+</div>
+{% endblock %}

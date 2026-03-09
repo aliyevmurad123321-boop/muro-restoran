@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 60px); }
+@media(max-width:700px){ .admin-layout { grid-template-columns:1fr; } }
+.admin-sidebar { background:var(--dark); padding:1.5rem 1rem; display:flex; flex-direction:column; gap:.3rem; }
+.sidebar-title { color:var(--gold); font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; padding:.5rem; margin-bottom:.5rem; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; color:#c8b890; text-decoration:none; padding:.7rem 1rem; border-radius:8px; font-size:.9rem; font-weight:600; transition:all .2s; }
+.sidebar-link:hover, .sidebar-link.active { background:rgba(201,168,76,.15); color:var(--gold); }
+.admin-main { padding:2rem; background:#f9f4ec; }
+.page-title { font-family:'Playfair Display',serif; font-size:1.8rem; margin-bottom:2rem; }
+.section-card { background:#fff; border-radius:12px; padding:1.5rem; border:1px solid #f0e5cc; margin-bottom:1.5rem; }
+.sc-title { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:1rem; }
+.add-form { display:grid; grid-template-columns:1fr 1fr 80px 80px auto; gap:.8rem; align-items:end; }
+@media(max-width:900px){ .add-form { grid-template-columns:1fr 1fr; } }
+.add-form .form-group { margin:0; }
+.add-form label { font-size:.8rem; }
+.item-row { display:flex; align-items:center; gap:.8rem; padding:.7rem; border-radius:8px; border:1px solid #f0e5cc; margin-bottom:.5rem; background:#fdfaf4; }
+.item-emoji-big { font-size:1.5rem; }
+.item-row-name  { flex:1; font-weight:600; }
+.item-row-desc  { flex:2; color:var(--muted); font-size:.85rem; }
+.item-row-price { color:var(--gold); font-weight:700; font-family:'Playfair Display',serif; white-space:nowrap; }
+.new-cat-form { display:flex; gap:.8rem; margin-top:1rem; }
+.new-cat-form input { flex:1; padding:.6rem 1rem; border:1.5px solid #e0d0b0; border-radius:8px; font-size:.9rem; font-family:'Nunito',sans-serif; background:#fdfaf4; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <div class="sidebar-title">⚙ Admin Panel</div>
+    <a href="/admin/dashboard"    class="sidebar-link"><span>📊</span> Dashboard</a>
+    <a href="/admin/orders"       class="sidebar-link"><span>🛒</span> Sifarişlər</a>
+    <a href="/admin/reservations" class="sidebar-link"><span>📅</span> Rezervasiyalar</a>
+    <a href="/admin/menu"         class="sidebar-link active"><span>🍽</span> Menyu İdarəsi</a>
+    <a href="/admin/settings"     class="sidebar-link"><span>⚙️</span> Parametrlər</a>
+    <div style="flex:1"></div>
+    <a href="/admin/logout" class="sidebar-link" style="color:#e74c3c;"><span>🚪</span> Çıxış</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="page-title">🍽 Menyu İdarəsi</div>
+
+    <!-- Yeni məhsul əlavə et -->
+    <div class="section-card">
+      <div class="sc-title">➕ Yeni Məhsul Əlavə Et</div>
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        <div class="add-form">
+          <div class="form-group">
+            <label>Ad *</label>
+            <input type="text" name="name" placeholder="Yemək adı" required>
+          </div>
+          <div class="form-group">
+            <label>Kateqoriya *</label>
+            <select name="category">
+              {% for cat in menu %}<option value="{{ cat }}">{{ cat }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Qiymət ₼</label>
+            <input type="number" name="price" step="0.50" min="0" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" name="emoji" placeholder="🍽️" maxlength="4" value="🍽️">
+          </div>
+          <div class="form-group">
+            <label>Açıqlama</label>
+            <input type="text" name="desc" placeholder="Qısa açıqlama">
+          </div>
+          <div>
+            <button type="submit" class="btn btn-gold" style="height:42px">Əlavə Et</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mövcud məhsullar -->
+    {% for category, items in menu.items() %}
+    <div class="section-card">
+      <div class="sc-title">{{ category }} ({{ items|length }} məhsul)</div>
+      {% for item in items %}
+      <div class="item-row">
+        <div class="item-emoji-big">{{ item.emoji }}</div>
+        <div class="item-row-name">{{ item.name }}</div>
+        <div class="item-row-desc">{{ item.desc }}</div>
+        <div class="item-row-price">{{ "%.2f"|format(item.price) }}₼</div>
+        <form method="POST" onsubmit="return confirm('Silmək istədiyinizə əminsiniz?')">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="category" value="{{ category }}">
+          <input type="hidden" name="item_id" value="{{ item.id }}">
+          <button type="submit" class="btn btn-red btn-sm">🗑 Sil</button>
+        </form>
+      </div>
+      {% else %}
+      <p style="color:var(--muted);font-size:.9rem">Bu kateqoriyada hələ məhsul yoxdur.</p>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+    <!-- Yeni kateqoriya -->
+    <div class="section-card">
+      <div class="sc-title">📁 Yeni Kateqoriya Əlavə Et</div>
+      <form method="POST" class="new-cat-form">
+        <input type="hidden" name="action" value="add_category">
+        <input type="text" name="new_category" placeholder="Kateqoriya adı (məs: Xörəklər)" required>
+        <button type="submit" class="btn btn-dark">+ Əlavə Et</button>
+      </form>
+    </div>
+  </main>
+</div>
+{% endblock %}

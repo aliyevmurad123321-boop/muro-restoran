@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block extra_head %}
+<style>
+.page-hero {
+  background:linear-gradient(135deg,var(--dark),var(--dark2));
+  padding:4rem 2rem 3rem;
+  text-align:center;
+  color:#fff;
+}
+.page-hero h1 { font-family:'Playfair Display',serif; font-size:2.5rem; color:var(--gold); }
+.page-hero p  { color:#c8b890; margin-top:.5rem; }
+
+.menu-wrap { max-width:1100px; margin:0 auto; padding:3rem 2rem; }
+.cat-tabs  { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:2.5rem; }
+.cat-tab {
+  padding:.5rem 1.2rem; border-radius:25px; border:1.5px solid var(--gold);
+  background:transparent; color:var(--gold); font-weight:700; font-size:.85rem;
+  cursor:pointer; transition:all .2s; font-family:'Nunito',sans-serif;
+}
+.cat-tab.active, .cat-tab:hover { background:var(--gold); color:var(--dark); }
+
+.cat-section { margin-bottom:3rem; }
+.cat-title   { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--dark); border-bottom:2px solid var(--gold); padding-bottom:.5rem; margin-bottom:1.5rem; }
+
+.items-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.2rem; }
+.item-card  {
+  background:#fff; border-radius:12px; padding:1.5rem;
+  border:1px solid #f0e5cc; display:flex; gap:1rem; align-items:flex-start;
+  transition:all .25s;
+}
+.item-card:hover { box-shadow:0 6px 20px rgba(201,168,76,.15); border-color:var(--gold); transform:translateY(-2px); }
+.item-emoji  { font-size:2.5rem; line-height:1; }
+.item-info   { flex:1; }
+.item-name   { font-weight:700; font-size:1rem; color:var(--dark); margin-bottom:.25rem; }
+.item-desc   { color:var(--muted); font-size:.85rem; line-height:1.5; margin-bottom:.5rem; }
+.item-price  { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--gold); font-weight:700; }
+.item-price::after { content:'₼'; font-size:.85rem; }
+
+.order-cta { text-align:center; background:var(--dark); border-radius:16px; padding:3rem 2rem; margin-top:2rem; }
+.order-cta h2 { font-family:'Playfair Display',serif; color:#fff; font-size:1.8rem; margin-bottom:.5rem; }
+.order-cta p  { color:#c8b890; margin-bottom:1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <h1>Bizim Menyu</h1>
+  <p>Ənənəvi Azərbaycan mətbəxinin ən dadlı nümunələri</p>
+</div>
+
+<div class="menu-wrap">
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="filterCat('all',this)">Hamısı</button>
+    {% for category in menu %}
+    <button class="cat-tab" onclick="filterCat('{{ category }}',this)">{{ category }}</button>
+    {% endfor %}
+  </div>
+
+  {% for category, items in menu.items() %}
+  <div class="cat-section" data-cat="{{ category }}">
+    <div class="cat-title">{{ category }}</div>
+    <div class="items-grid">
+      {% for item in items %}
+      <div class="item-card">
+        <div class="item-emoji">{{ item.emoji }}</div>
+        <div class="item-info">
+          <div class="item-name">{{ item.name }}</div>
+          <div class="item-desc">{{ item.desc }}</div>
+          <div class="item-price">{{ "%.2f"|format(item.price) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="order-cta">
+    <h2>Xoşunuza gəldi?</h2>
+    <p>İndi sifariş verin, masanızda hazır olsun!</p>
+    <a href="/order" class="btn btn-gold">🛒 Sifariş Et</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cat-section').forEach(s => {
+    s.style.display = (cat==='all' || s.dataset.cat===cat) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}
